@@ -52,3 +52,7 @@ jobs:
           docker build -t my-app .
           docker tag my-app myusername/my-app:latest
           docker push myusername/my-app:latest  # Docker Hub에 이미지 푸시
+
+      - name: Run tests
+        run: |
+          pytest tests/  # tests 폴더 안의 테스트 파일을 실행
