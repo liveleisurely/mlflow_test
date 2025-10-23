@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.2
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow.db
+      --default-artifact-root /mlflow/mlruns
+      --host 0.0.0.0
+
+  trainer:
+    build: .
+    container_name: trainer
+    volumes:
+      - .:/app
+    depends_on:
+      - mlflow
+    command: ["python", "train.py"]
+
+  fastapi:
+    build: .
+    container_name: fastapi
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    working_dir: /app/inference
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      - mlflow
